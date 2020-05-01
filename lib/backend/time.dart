@@ -27,6 +27,10 @@ String showTime(DateTime now) {
     hour = (now.hour - 12).toString();
     end = "pm";
   }
+  // need to figure out how to handle midday and midnight
+  if (now.hour == 12) {
+    end = "pm";
+  }
   if (now.minute < 10) {
     minute = "0" + minute;
   }

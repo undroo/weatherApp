@@ -5,29 +5,41 @@ const apiKey = '8a9713afca1ce19dba4b3bf6c1beeed4';
 // https://api.openweathermap.org/data/2.5/onecall?lat={lat}&lon={lon}&appid={YOUR API KEY}
 
 class WeatherModel {
-  int temperature = 100000;
-  String cityName = 'Fake city';
-  String weatherMessage = 'Fake message';
+  String temperature;
+  String cityName;
+  String weatherMessage;
+  int weatherID = 800;
+  String humidity;
+  String pressure;
+  String uvi;
+  String wind;
+  var weatherData;
 
   void updateWeather() async {
+    this.weatherData = await getWeather();
+    setValues(this.weatherData);
+  }
+
+  Future<dynamic> getWeather() async {
     Location location = Location();
-    await location
-        .getCurrentLocation(); //updates current location in the location object
+    await location.getCurrentLocation();
+
     NetworkHelper networkHelper = NetworkHelper(
         'https://api.openweathermap.org/data/2.5/onecall?lat=${location.latitude}&lon=${location.longitude}&appid=$apiKey&units=metric');
 
     var weatherData = await networkHelper.getData();
-    print("this is data: " + weatherData['timezone']);
-    setValues(weatherData);
+    print("location is: ${weatherData['timezone'].toString()}");
+    return weatherData;
   }
 
   void setValues(dynamic weatherData) {
     this.cityName = weatherData['timezone'].toString();
-    this.temperature = weatherData['current']['temp'].round();
+    this.temperature = weatherData['current']['temp'].round().toString();
     this.weatherMessage = weatherData['current']['weather'][0]['description'];
+    this.weatherID = weatherData['current']['weather'][0]['id'];
   }
 
-  int getTemp() {
+  String getTemp() {
     return this.temperature;
   }
 
@@ -37,5 +49,9 @@ class WeatherModel {
 
   String getWeatherMessage() {
     return this.weatherMessage;
+  }
+
+  int getWeatherID() {
+    return this.weatherID;
   }
 }

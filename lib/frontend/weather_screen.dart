@@ -1,5 +1,5 @@
-import 'package:weatherApp/backend/weather.dart';
 import 'package:flutter/material.dart';
+import 'package:weatherApp/backend/weather.dart';
 import 'package:weatherApp/backend/time.dart';
 
 class WeatherScreen extends StatefulWidget {
@@ -9,30 +9,83 @@ class WeatherScreen extends StatefulWidget {
 
 class _WeatherScreenState extends State<WeatherScreen> {
   WeatherModel weather = WeatherModel();
-  int temperature = 0;
+  String temperature = '';
   String weatherIcon = '';
   String cityName = '';
   String weatherMessage = '';
   var now = DateTime.now();
+  var weatherData;
+  int weatherID = 800; // 800 is ID for sunny
 
+  // should probably use a StreamBuilder instead of just calling api alot?
   void updateUI() async {
-    await weather.updateWeather();
+    weatherData = await weather.getWeather();
+    weather.setValues(weatherData);
     setState(() {
       if (weather == null) {
-        temperature = 0;
+        temperature = 'missing temp';
         cityName = 'missing city';
         weatherMessage = 'missing message';
       } else {
         temperature = weather.getTemp();
         cityName = weather.getCityName();
         weatherMessage = weather.getWeatherMessage();
+        weatherID = weather.getWeatherID();
         now = DateTime.now();
       }
     });
   }
 
-  IconData decideIcon() {
-    return Icons.wb_sunny;
+  Icon decideIcon(int weatherID) {
+    DateTime now = DateTime.now();
+    if (now.hour < 6 || now.hour > 18) {
+      if (weatherID > 800) {
+        return Icon(
+          Icons.filter_drama,
+          size: 150.0,
+          color: Colors.white,
+        );
+      } else if (weatherID == 800) {
+        return Icon(
+          Icons.brightness_2,
+          size: 150.0,
+          color: Colors.grey[100],
+        );
+      } else {
+        // raining weather
+        return Icon(
+          Icons.beach_access,
+          size: 150.0,
+          color: Colors.blueAccent[900],
+        );
+      }
+    } else {
+      if (weatherID > 800) {
+        return Icon(
+          Icons.filter_drama,
+          size: 150.0,
+          color: Colors.white,
+        );
+      } else if (weatherID == 800) {
+        return Icon(
+          Icons.wb_sunny,
+          size: 150.0,
+          color: Colors.yellowAccent,
+        );
+      } else {
+        // need to fix remaining icons later
+        return Icon(
+          Icons.beach_access,
+          size: 150.0,
+          color: Colors.blueAccent[900],
+        );
+      }
+      return Icon(
+        Icons.wb_sunny,
+        size: 150.0,
+        color: Colors.yellowAccent,
+      );
+    }
   }
 
   @override
@@ -44,90 +97,104 @@ class _WeatherScreenState extends State<WeatherScreen> {
 
   @override
   Widget build(BuildContext context) {
-    return GestureDetector(
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.start,
+    return SafeArea(
+      child: PageView(
+        scrollDirection: Axis.vertical,
         children: <Widget>[
-          Padding(
-            padding: const EdgeInsets.all(16.0),
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          Row(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+            children: <Widget>[
+              // replace this column with a card class
+              Column(
+                children: <Widget>[
+                  Text(
+                    fullTime(now),
+                    style: TextStyle(
+                      fontSize: 20.0,
+                      shadows: <Shadow>[
+                        Shadow(
+                          offset: Offset(0.5, 0.5),
+                          blurRadius: 1.0,
+                          color: Colors.blueGrey,
+                        )
+                      ],
+                    ),
+                  ),
+                  Text(
+                    temperature,
+                    style: TextStyle(
+                      color: Colors.white,
+                      fontSize: 150.0,
+                      fontWeight: FontWeight.w300,
+                      shadows: <Shadow>[
+                        Shadow(
+                          offset: Offset(2.5, 2.5),
+                          blurRadius: 1.0,
+                          color: Colors.blueGrey,
+                        )
+                      ],
+                    ),
+                  ),
+                  Text(
+                    cityName,
+                    style: TextStyle(
+                      fontWeight: FontWeight.bold,
+                      shadows: <Shadow>[
+                        Shadow(
+                          offset: Offset(0.5, 0.5),
+                          blurRadius: 1.0,
+                          color: Colors.blueGrey,
+                        )
+                      ],
+                    ),
+                  ),
+                  Text(
+                    weatherMessage,
+                    style: TextStyle(
+                      fontStyle: FontStyle.italic,
+                      shadows: <Shadow>[
+                        Shadow(
+                          offset: Offset(0.5, 0.5),
+                          blurRadius: 1.0,
+                          color: Colors.blueGrey,
+                        )
+                      ],
+                    ),
+                  ),
+                ],
+                crossAxisAlignment: CrossAxisAlignment.center,
+              ),
+              Padding(
+                padding: const EdgeInsets.all(8.0),
+                child: decideIcon(weatherID),
+              ),
+            ],
+          ),
+          //Container for the extra information
+          Container(
+            color: Colors.white,
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
               children: <Widget>[
-                Column(
-                  children: <Widget>[
-                    Text(
-                      fullTime(now),
-                      style: TextStyle(
-                        fontSize: 20.0,
-                        shadows: <Shadow>[
-                          Shadow(
-                            offset: Offset(0.5, 0.5),
-                            blurRadius: 1.0,
-                            color: Colors.blueGrey,
-                          )
-                        ],
-                      ),
-                    ),
-                    Text(
-                      '$temperature',
-                      style: TextStyle(
-                        color: Colors.white,
-                        fontSize: 150.0,
-                        fontWeight: FontWeight.w300,
-                        shadows: <Shadow>[
-                          Shadow(
-                            offset: Offset(2.5, 2.5),
-                            blurRadius: 1.0,
-                            color: Colors.blueGrey,
-                          )
-                        ],
-                      ),
-                    ),
-                    Text(
-                      cityName,
-                      style: TextStyle(
-                        fontWeight: FontWeight.bold,
-                        shadows: <Shadow>[
-                          Shadow(
-                            offset: Offset(0.5, 0.5),
-                            blurRadius: 1.0,
-                            color: Colors.blueGrey,
-                          )
-                        ],
-                      ),
-                    ),
-                    Text(
-                      weatherMessage,
-                      style: TextStyle(
-                        fontStyle: FontStyle.italic,
-                        shadows: <Shadow>[
-                          Shadow(
-                            offset: Offset(0.5, 0.5),
-                            blurRadius: 1.0,
-                            color: Colors.blueGrey,
-                          )
-                        ],
-                      ),
-                    ),
-                  ],
-                ),
-                Padding(
-                  padding: const EdgeInsets.all(10.0),
-                  child: Icon(
-                    decideIcon(),
-                    size: 150.0,
-                    color: Colors.yellow,
+                Text(
+                  'Current',
+                  style: TextStyle(
+                    fontWeight: FontWeight.bold,
+                    fontSize: 30.0,
                   ),
                 ),
+                Text('Humidity: %'),
+                Text('Pressure: '),
+                Text('UV index: '),
+                Text('Wind Speed: '),
+                Text('Sunrise: '),
+                Text('Sunset: '),
               ],
             ),
           ),
         ],
       ),
-      onVerticalDragStart: (dragDetails) {
-        print("drag");
-        updateUI();
-      },
     );
   }
 }
