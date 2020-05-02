@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:weatherApp/frontend/forecast_screen.dart';
-import 'package:weatherApp/frontend/weather_screen.dart';
+import 'package:weatherApp/frontend/new_weather_screen.dart';
 
 void main() {
   runApp(MyApp());
@@ -53,7 +53,7 @@ class _MyHomePageState extends State<MyHomePage> {
       body: SafeArea(
         child: PageView(
           controller: PageController(
-            initialPage: 1,
+            initialPage: 0,
           ),
           scrollDirection: Axis.horizontal,
           children: <Widget>[
